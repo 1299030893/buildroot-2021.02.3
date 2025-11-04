@@ -4,10 +4,16 @@
 
 ## 基本信息
 
-- **OpenSSL 版本**: 1.1.1k
-- **源码下载地址**: https://www.openssl.org/source/openssl-1.1.1k.tar.gz
-- **SHA256 校验值**: `892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5`
+- **OpenSSL 版本**: 3.0.16 (LTS) ⚠️ **注意**: Buildroot 2021.02.3 使用的是 1.1.1k，该版本已停止维护，存在安全风险
+- **源码下载地址**: https://www.openssl.org/source/openssl-3.0.16.tar.gz
+- **推荐版本**: 
+  - OpenSSL 3.0.x (LTS) - 长期支持，推荐生产环境
+  - OpenSSL 3.1.x - 稳定版本
+  - OpenSSL 3.2.x - 最新版本
+- **⚠️ 不推荐**: OpenSSL 1.1.1 系列已于 2023年9月停止维护，存在严重安全风险
 - **依赖项**: zlib
+
+**详细版本信息请参考**: `OPENSSL_VERSION_INFO.md`
 
 ---
 

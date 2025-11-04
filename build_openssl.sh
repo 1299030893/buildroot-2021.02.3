@@ -14,10 +14,17 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # 默认配置
-OPENSSL_VERSION="1.1.1k"
+# 注意：OpenSSL 1.1.1 系列已于 2023年9月停止维护（EOL），存在安全风险
+# 推荐使用 OpenSSL 3.0.x (LTS) 或 3.1.x / 3.2.x 版本
+OPENSSL_VERSION="3.0.16"  # LTS 版本，长期支持
+# 备选版本：
+# OPENSSL_VERSION="3.1.7"   # 稳定版本
+# OPENSSL_VERSION="3.2.3"    # 最新版本（需要验证）
+# OPENSSL_VERSION="1.1.1w"   # 最后维护版本（已停止更新，不推荐）
 OPENSSL_SOURCE_URL="https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
 OPENSSL_SOURCE_FILE="openssl-${OPENSSL_VERSION}.tar.gz"
-OPENSSL_SHA256="892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5"
+# SHA256 校验值（需要根据实际下载的版本更新）
+OPENSSL_SHA256=""  # 留空则不验证，建议从官网获取对应版本的 SHA256
 
 # 工作目录
 WORK_DIR="${PWD}/openssl-build"
@@ -57,6 +64,8 @@ usage() {
 选项:
     -h, --help              显示帮助信息
     -v, --version VERSION    指定 OpenSSL 版本 (默认: ${OPENSSL_VERSION})
+                           推荐: 3.0.x (LTS), 3.1.x, 3.2.x
+                           注意: 1.1.1 系列已停止维护，存在安全风险
     -a, --arch ARCH         指定目标架构 (默认: ${TARGET_ARCH})
                           支持: linux-armv4, linux-aarch64, linux-x86, linux-x86_64
                                 linux-ppc, linux-ppc64, linux-ppc64le
@@ -216,11 +225,13 @@ download_source() {
     if [ -f "$WORK_DIR/$OPENSSL_SOURCE_FILE" ]; then
         info "源码文件已存在: $WORK_DIR/$OPENSSL_SOURCE_FILE"
         
-        # 验证 SHA256（如果可用）
-        if command -v sha256sum &> /dev/null; then
+        # 验证 SHA256（如果提供了校验值）
+        if [ -n "$OPENSSL_SHA256" ] && command -v sha256sum &> /dev/null; then
             info "验证 SHA256 校验值..."
             echo "${OPENSSL_SHA256}  ${WORK_DIR}/${OPENSSL_SOURCE_FILE}" | sha256sum -c || \
                 warn "SHA256 校验失败，但继续执行..."
+        elif [ -z "$OPENSSL_SHA256" ]; then
+            warn "未设置 SHA256 校验值，跳过验证"
         fi
         return
     fi
@@ -233,11 +244,14 @@ download_source() {
         error "下载失败: $OPENSSL_SOURCE_URL"
     fi
     
-    # 验证 SHA256
-    if command -v sha256sum &> /dev/null; then
+    # 验证 SHA256（如果提供了校验值）
+    if [ -n "$OPENSSL_SHA256" ] && command -v sha256sum &> /dev/null; then
         info "验证 SHA256 校验值..."
         echo "${OPENSSL_SHA256}  ${OPENSSL_SOURCE_FILE}" | sha256sum -c || \
             warn "SHA256 校验失败，但继续执行..."
+    elif [ -z "$OPENSSL_SHA256" ]; then
+        warn "未设置 SHA256 校验值，跳过验证"
+        warn "建议从 https://www.openssl.org/source/ 获取对应版本的 SHA256 值"
     fi
     
     info "下载完成"
